@@ -63,8 +63,8 @@ export function InstallPrompt() {
 
   if (showIosHint && isIOS()) {
     return (
-      <div className="fixed bottom-20 left-4 right-4 z-50 animate-fade-slide lg:bottom-4 lg:left-72 lg:right-auto lg:max-w-sm">
-        <div className="bg-white rounded-2xl elevated-shadow p-4">
+      <div className="fixed bottom-24 left-4 right-4 z-50 animate-fade-slide md:bottom-4 md:left-24 md:right-auto md:max-w-sm xl:left-64">
+        <div className="clay-surface rounded-3xl p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden">
               <img src={APP_LOGO} alt={APP_NAME} className="w-full h-full object-cover" />
@@ -89,8 +89,8 @@ export function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 animate-fade-slide lg:bottom-4 lg:left-72 lg:right-auto lg:max-w-sm">
-      <div className="bg-white rounded-2xl elevated-shadow p-4 flex items-center gap-3">
+    <div className="fixed bottom-24 left-4 right-4 z-50 animate-fade-slide md:bottom-4 md:left-24 md:right-auto md:max-w-sm xl:left-64">
+      <div className="clay-surface rounded-3xl p-4 flex items-center gap-3">
         <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden">
           <img src={APP_LOGO} alt={APP_NAME} className="w-full h-full object-cover" />
         </div>

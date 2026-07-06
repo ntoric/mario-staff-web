@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
-import { ArrowLeft, Search, Plus, Minus, Trash2, Save, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Search, Plus, Minus, Trash2, Save, ChevronDown, ChevronUp } from 'lucide-react'
+import { OverlayHeader } from '../components/AppHeader'
 import { useAuthStore } from '../stores/authStore'
 import { useDataStore } from '../stores/dataStore'
 import { api } from '../lib/api'
@@ -173,23 +174,13 @@ export function OrderEditor({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray200 safe-top">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-5xl mx-auto lg:px-8">
-          <button onClick={onBack} className="p-2 -ml-2 text-gray500">
-            <ArrowLeft size={22} />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-extrabold text-dark">
-              Table {tableNumber}
-            </h1>
-            <p className="text-xs text-gray500">
-              {existingOrder ? 'Edit order' : 'New order'} · {totalItems} items
-            </p>
-          </div>
-        </div>
-      </header>
+      <OverlayHeader
+        title={`Table ${tableNumber}`}
+        subtitle={`${existingOrder ? 'Edit order' : 'New order'} · ${totalItems} items`}
+        onBack={onBack}
+      />
 
-      <div className="max-w-5xl mx-auto pb-48 lg:px-3">
+      <div className="max-w-6xl mx-auto pb-48">
         {error && (
           <div className="mx-5 mt-4 p-3 bg-danger/8 rounded-xl border border-danger/20 text-danger text-sm font-medium">
             {error}
@@ -209,14 +200,10 @@ export function OrderEditor({
           </div>
         </div>
 
-        <div className="px-5 pt-3 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-4 pt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
           <button
             onClick={() => setSelectedCategoryId('all')}
-            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
-              selectedCategoryId === 'all'
-                ? 'gradient-primary text-white'
-                : 'bg-white text-gray500 card-shadow'
-            }`}
+            className={`filter-chip ${selectedCategoryId === 'all' ? 'filter-chip-active' : 'filter-chip-inactive'}`}
           >
             All
           </button>
@@ -224,28 +211,24 @@ export function OrderEditor({
             <button
               key={cat.id}
               onClick={() => setSelectedCategoryId(cat.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
-                selectedCategoryId === cat.id
-                  ? 'gradient-primary text-white'
-                  : 'bg-white text-gray500 card-shadow'
-              }`}
+              className={`filter-chip ${selectedCategoryId === cat.id ? 'filter-chip-active' : 'filter-chip-inactive'}`}
             >
               {cat.name}
             </button>
           ))}
         </div>
 
-        <div className="px-5 pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        <div className="px-4 pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {filteredItems.map((item) => {
             const inCart = cart.get(item.id)
             return (
               <button
                 key={item.id}
                 onClick={() => addToCart(item)}
-                className="bg-white rounded-2xl card-shadow p-4 text-left transition-all active:scale-95 relative"
+                className="clay-surface rounded-3xl p-4 text-left transition-all active:scale-95 relative tilt-press"
               >
                 {inCart && (
-                  <span className="absolute -top-2 -right-2 w-7 h-7 gradient-primary text-white rounded-full flex items-center justify-center text-xs font-extrabold elevated-shadow">
+                  <span className="absolute -top-2 -right-2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-extrabold elevated-shadow">
                     {inCart.quantity}
                   </span>
                 )}
@@ -266,8 +249,8 @@ export function OrderEditor({
       </div>
 
       {cart.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray200 safe-bottom">
-          <div className="max-w-5xl mx-auto lg:px-8">
+        <div className="fixed bottom-0 left-0 right-0 z-50 clay-nav-bar border-t-0 rounded-t-[28px] safe-bottom">
+          <div className="max-w-6xl mx-auto">
             <button
               onClick={() => setSummaryExpanded(!summaryExpanded)}
               className="w-full px-5 py-3 flex items-center justify-between"

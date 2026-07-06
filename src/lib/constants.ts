@@ -1,6 +1,6 @@
 export const APP_NAME = 'Mario POS'
 export const APP_VERSION = '1.0.0'
-export const APP_LOGO = '/logo-purle.png'
+export const APP_LOGO = '/logo.png'
 export const DEFAULT_API_URL = 'https://mario-v2-backend.ntoric.com/api'
 
 export function formatCurrency(amount: number): string {

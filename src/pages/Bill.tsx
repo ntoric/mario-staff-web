@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, FileText, CreditCard, Banknote, Smartphone, User, CheckCircle, Printer } from 'lucide-react'
+import { FileText, CreditCard, Banknote, Smartphone, User, CheckCircle, Printer } from 'lucide-react'
+import { OverlayHeader } from '../components/AppHeader'
 import { useAuthStore } from '../stores/authStore'
 import { useDataStore } from '../stores/dataStore'
 import { api } from '../lib/api'
-import { formatCurrency, formatDate } from '../lib/constants'
+import { formatCurrency } from '../lib/constants'
 import type { Order } from '../types'
 
 const PAYMENT_METHODS = [
@@ -72,21 +73,13 @@ export function Bill({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray200 safe-top">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-5xl mx-auto lg:px-8">
-          <button onClick={onBack} className="p-2 -ml-2 text-gray500">
-            <ArrowLeft size={22} />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-extrabold text-dark">Generate Bill</h1>
-            <p className="text-xs text-gray500">
-              {order.orderType === 'parcel' ? 'Parcel Order' : `Table ${order.tableNumber}`} · {formatDate(order.createdAt)}
-            </p>
-          </div>
-        </div>
-      </header>
+      <OverlayHeader
+        title="Generate Bill"
+        subtitle={`${order.orderType === 'parcel' ? 'Parcel Order' : `Table ${order.tableNumber}`}`}
+        onBack={onBack}
+      />
 
-      <div className="max-w-2xl mx-auto px-5 py-5 pb-32 lg:px-8">
+      <div className="max-w-2xl mx-auto px-4 py-5 pb-32">
         {error && (
           <div className="mb-4 p-3 bg-danger/8 rounded-xl border border-danger/20 text-danger text-sm font-medium">
             {error}
@@ -119,7 +112,15 @@ export function Bill({
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-2xl card-shadow p-5 mb-4">
+            <div className="bg-cardDark rounded-3xl p-6 mb-4 text-center">
+              <p className="text-white/60 text-sm">Total Amount</p>
+              <p className="text-white text-[44px] font-extrabold mt-1 tracking-tight">{formatCurrency(total)}</p>
+              <span className="inline-block mt-3 px-4 py-1.5 bg-white/10 rounded-xl text-white text-sm font-bold">
+                {order.orderType === 'parcel' ? 'Parcel' : `Table ${order.tableNumber}`}
+              </span>
+            </div>
+
+            <div className="clay-surface rounded-3xl p-5 mb-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <FileText size={20} className="text-primary" />
@@ -166,7 +167,7 @@ export function Bill({
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl card-shadow p-5 mb-4">
+            <div className="clay-surface rounded-3xl p-5 mb-4">
               <h3 className="font-extrabold text-dark mb-3">Customer Name (optional)</h3>
               <div className="relative">
                 <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray400" />
@@ -180,9 +181,9 @@ export function Bill({
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl card-shadow p-5 mb-4">
+            <div className="clay-surface rounded-3xl p-5 mb-4">
               <h3 className="font-extrabold text-dark mb-3">Payment Method</h3>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {PAYMENT_METHODS.map((method) => {
                   const Icon = method.icon
                   const isSelected = paymentMethod === method.value
@@ -190,10 +191,10 @@ export function Bill({
                     <button
                       key={method.value}
                       onClick={() => setPaymentMethod(method.value)}
-                      className={`flex-1 h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
+                      className={`h-16 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
                         isSelected
-                          ? 'gradient-primary text-white elevated-shadow'
-                          : 'bg-gray100 text-gray500'
+                          ? 'bg-primary text-white soft-shadow'
+                          : 'clay-inset text-gray500'
                       }`}
                     >
                       <Icon size={20} />
@@ -207,7 +208,7 @@ export function Bill({
             <button
               onClick={handleGenerateBill}
               disabled={isGenerating}
-              className="w-full h-14 btn-primary flex items-center justify-center gap-2"
+              className="w-full h-14 btn-primary rounded-2xl flex items-center justify-center gap-2"
             >
               <FileText size={20} />
               {isGenerating ? 'Generating...' : 'Generate Bill'}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
-import { ArrowLeft, Search, Plus, Minus, Trash2, Save, User, Phone, ChevronDown, ChevronUp, CreditCard, Banknote, Smartphone } from 'lucide-react'
+import { Search, Plus, Minus, Trash2, Save, User, Phone, ChevronDown, ChevronUp, CreditCard, Banknote, Smartphone } from 'lucide-react'
+import { AppHeader, OverlayHeader } from '../components/AppHeader'
 import { useAuthStore } from '../stores/authStore'
 import { useDataStore } from '../stores/dataStore'
 import { api } from '../lib/api'
@@ -12,7 +13,15 @@ const PAYMENT_METHODS = [
   { value: 'upi', label: 'UPI', icon: Smartphone },
 ]
 
-export function ParcelOrder({ onBack }: { onBack: () => void }) {
+export function ParcelOrder({
+  onBack,
+  onComplete,
+  embedded = false,
+}: {
+  onBack: () => void
+  onComplete?: () => void
+  embedded?: boolean
+}) {
   const { currentStore } = useAuthStore()
   const { categories, items, loadStoreData } = useDataStore()
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all')
@@ -137,7 +146,7 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
       )
       await loadStoreData(currentStore.id)
       setSuccess('Parcel order created successfully!')
-      setTimeout(() => onBack(), 1200)
+      setTimeout(() => (onComplete ?? onBack)(), 1200)
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -150,19 +159,25 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray200 safe-top">
-        <div className="px-4 py-3 flex items-center gap-3 max-w-5xl mx-auto lg:px-8">
-          <button onClick={onBack} className="p-2 -ml-2 text-gray500">
-            <ArrowLeft size={22} />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-extrabold text-dark">Parcel Order</h1>
-            <p className="text-xs text-gray500">{totalItems} items in cart</p>
-          </div>
-        </div>
-      </header>
+      {embedded ? (
+        <AppHeader title="Parcel Order" subtitle={`${totalItems} items in cart`} />
+      ) : (
+        <OverlayHeader
+          title="Parcel Order"
+          subtitle={`${totalItems} items in cart`}
+          onBack={onBack}
+        />
+      )}
 
-      <div className="max-w-5xl mx-auto pb-48 lg:px-3">
+      <div
+        className={`max-w-6xl mx-auto px-4 ${
+          embedded
+            ? cart.size > 0
+              ? 'pb-[calc(240px+var(--mobile-bottom-nav-height))] md:pb-52'
+              : 'page-content !pt-0 !pb-28 md:!pb-6'
+            : 'pb-48'
+        } ${embedded && cart.size === 0 ? 'page-content !pt-0' : embedded ? 'pt-0' : ''}`}
+      >
         {error && (
           <div className="mx-5 mt-4 p-3 bg-danger/8 rounded-xl border border-danger/20 text-danger text-sm font-medium">
             {error}
@@ -192,7 +207,7 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
             onClick={() => setSelectedCategoryId('all')}
             className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
               selectedCategoryId === 'all'
-                ? 'gradient-primary text-white'
+                ? 'bg-primary text-white'
                 : 'bg-white text-gray500 card-shadow'
             }`}
           >
@@ -204,7 +219,7 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
               onClick={() => setSelectedCategoryId(cat.id)}
               className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
                 selectedCategoryId === cat.id
-                  ? 'gradient-primary text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-white text-gray500 card-shadow'
               }`}
             >
@@ -223,7 +238,7 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
                 className="bg-white rounded-2xl card-shadow p-4 text-left transition-all active:scale-95 relative"
               >
                 {inCart && (
-                  <span className="absolute -top-2 -right-2 w-7 h-7 gradient-primary text-white rounded-full flex items-center justify-center text-xs font-extrabold elevated-shadow">
+                  <span className="absolute -top-2 -right-2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-extrabold elevated-shadow">
                     {inCart.quantity}
                   </span>
                 )}
@@ -276,7 +291,7 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
                   onClick={() => setPaymentMethod(method.value)}
                   className={`flex-1 h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all active:scale-95 ${
                     isSelected
-                      ? 'gradient-primary text-white elevated-shadow'
+                      ? 'bg-primary text-white elevated-shadow'
                       : 'bg-white text-gray500 card-shadow'
                   }`}
                 >
@@ -290,8 +305,10 @@ export function ParcelOrder({ onBack }: { onBack: () => void }) {
       </div>
 
       {cart.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray200 safe-bottom">
-          <div className="max-w-5xl mx-auto lg:px-8">
+        <div
+          className={`cart-bar safe-bottom ${embedded ? 'cart-bar-above-nav' : 'bottom-0'}`}
+        >
+          <div className="max-w-6xl mx-auto">
             <button
               onClick={() => setSummaryExpanded(!summaryExpanded)}
               className="w-full px-5 py-3 flex items-center justify-between"

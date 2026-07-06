@@ -22,9 +22,9 @@ export function UpdatePrompt() {
   }
 
   return (
-    <div className="fixed top-4 left-4 right-4 z-[70] animate-fade-slide lg:left-72 lg:right-auto lg:max-w-sm">
-      <div className="bg-white rounded-2xl elevated-shadow p-4 flex items-center gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary-extraLight flex items-center justify-center">
+    <div className="fixed top-4 left-4 right-4 z-[70] animate-fade-slide md:left-24 md:right-auto md:max-w-sm xl:left-64 safe-top">
+      <div className="clay-surface rounded-3xl p-4 flex items-center gap-3">
+        <div className="flex-shrink-0 w-10 h-10 rounded-2xl clay-accent flex items-center justify-center">
           <RefreshCw size={20} className="text-primary" />
         </div>
         <div className="flex-1 min-w-0">

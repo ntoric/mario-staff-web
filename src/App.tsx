@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useAuthStore } from './stores/authStore'
 import { useDataStore } from './stores/dataStore'
-import { BottomNav } from './components/BottomNav'
+import { useThemeStore } from './stores/themeStore'
+import { BottomNav, ALL_NAV_ITEMS, type NavItem } from './components/BottomNav'
 import { Splash } from './pages/Splash'
 import { Login } from './pages/Login'
 import { Tables } from './pages/Tables'
@@ -10,26 +11,42 @@ import { OrderEditor } from './pages/OrderEditor'
 import { History } from './pages/History'
 import { Statistics } from './pages/Statistics'
 import { Settings } from './pages/Settings'
+import { Menu } from './pages/Menu'
 import { ParcelOrder } from './pages/ParcelOrder'
 import { Bill } from './pages/Bill'
 import type { Order } from './types'
 
-type Page = 'tables' | 'orders' | 'history' | 'stats' | 'settings'
+type PageId = 'tables' | 'orders' | 'history' | 'stats' | 'menu' | 'parcel' | 'settings'
 type Overlay =
   | { type: 'orderEditor'; tableId: string; tableNumber: number; existingOrder?: Order }
-  | { type: 'parcelOrder' }
   | { type: 'bill'; order: Order }
   | null
 
+function canViewStats(role?: string) {
+  return role === 'superadmin' || role === 'business_owner' || role === 'business_admin'
+}
+
 export default function App() {
-  const { isAuthenticated, isInitialized, initialize, logout, currentStore } = useAuthStore()
+  const { user, isAuthenticated, isInitialized, initialize, logout, currentStore } = useAuthStore()
   const { loadStoreData } = useDataStore()
-  const [currentPage, setCurrentPage] = useState<Page>('tables')
+  const { loadTheme } = useThemeStore()
+  const [currentPage, setCurrentPage] = useState<PageId>('tables')
   const [overlay, setOverlay] = useState<Overlay>(null)
+
+  const navItems: NavItem[] = useMemo(() => {
+    return ALL_NAV_ITEMS.filter((item) => {
+      if (item.id === 'stats') return canViewStats(user?.role)
+      return true
+    })
+  }, [user?.role])
 
   useEffect(() => {
     initialize()
   }, [])
+
+  useEffect(() => {
+    loadTheme(user?.id)
+  }, [user?.id])
 
   useEffect(() => {
     if (isAuthenticated && currentStore) {
@@ -57,30 +74,27 @@ export default function App() {
             onGenerateBill={(order) => setOverlay({ type: 'bill', order })}
           />
         )
-      case 'parcelOrder':
-        return <ParcelOrder onBack={() => setOverlay(null)} />
       case 'bill':
         return <Bill order={overlay.order} onBack={() => setOverlay(null)} />
     }
   }
 
-  const handleLogout = async () => {
-    await logout()
+  const currentIndex = navItems.findIndex((item) => item.id === currentPage)
+
+  const handleTabChange = (index: number) => {
+    setCurrentPage(navItems[index].id as PageId)
   }
 
-  const navIndex = ['tables', 'orders', 'history', 'stats', 'settings'].indexOf(currentPage)
-
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-0">
-      {currentPage === 'tables' && (
+    <div className="min-h-screen bg-background">
+      <div className={currentPage === 'tables' ? '' : 'hidden'}>
         <Tables
           onOpenOrder={(tableId, tableNumber, existingOrder) =>
             setOverlay({ type: 'orderEditor', tableId, tableNumber, existingOrder })
           }
-          onParcelOrder={() => setOverlay({ type: 'parcelOrder' })}
         />
-      )}
-      {currentPage === 'orders' && (
+      </div>
+      <div className={currentPage === 'orders' ? '' : 'hidden'}>
         <Orders
           onEditOrder={(order) =>
             setOverlay({
@@ -92,15 +106,28 @@ export default function App() {
           }
           onGenerateBill={(order) => setOverlay({ type: 'bill', order })}
         />
-      )}
-      {currentPage === 'history' && <History />}
-      {currentPage === 'stats' && <Statistics />}
-      {currentPage === 'settings' && <Settings onLogout={handleLogout} />}
+      </div>
+      <div className={currentPage === 'history' ? '' : 'hidden'}>
+        <History />
+      </div>
+      <div className={currentPage === 'stats' ? '' : 'hidden'}>
+        <Statistics />
+      </div>
+      <div className={currentPage === 'menu' ? '' : 'hidden'}>
+        <Menu />
+      </div>
+      <div className={currentPage === 'parcel' ? '' : 'hidden'}>
+        <ParcelOrder
+          embedded
+          onBack={() => setCurrentPage('tables')}
+          onComplete={() => setCurrentPage('history')}
+        />
+      </div>
+      <div className={currentPage === 'settings' ? '' : 'hidden'}>
+        <Settings onLogout={() => logout()} />
+      </div>
 
-      <BottomNav
-        currentIndex={navIndex}
-        onTabChange={(index) => setCurrentPage(['tables', 'orders', 'history', 'stats', 'settings'][index] as Page)}
-      />
+      <BottomNav navItems={navItems} currentIndex={Math.max(0, currentIndex)} onTabChange={handleTabChange} />
     </div>
   )
 }

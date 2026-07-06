@@ -64,7 +64,7 @@ export function ShimmerBox({
 
 export function AnimatedProgress({
   value,
-  color = '#7B6EF6',
+  color = 'var(--primary)',
   height = 8,
 }: {
   value: number
@@ -107,7 +107,7 @@ export function GlassCard({
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-2xl card-shadow transition-all duration-350 ${className} ${
+      className={`bg-white clay-surface rounded-3xl transition-all duration-350 ${className} ${
         onClick ? 'cursor-pointer active:scale-95' : ''
       }`}
     >
